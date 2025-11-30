@@ -18,6 +18,7 @@ const usuarioModal = document.querySelector("#usuario-modal") //Modal que aparec
 const btnGuardarUsuario = document.querySelector("#btn-guardar-usuario")
 const formularioGastos = document.querySelector(".formulario-gastos")
 const usuarioInput = document.querySelector("#usuario-input")
+let usuario = usuarioInput.value
 
 document.addEventListener("DOMContentLoaded", () => {
   usuarioModal.classList.remove("hidden")
@@ -26,35 +27,29 @@ document.addEventListener("DOMContentLoaded", () => {
 if (btnGuardarUsuario) {
   btnGuardarUsuario.addEventListener("click", () => {
     if (usuarioInput.value.trim() !== "") {
+
+      //Elimina el modal y muestra el formulario
       usuarioModal.classList.add("hidden")
       formularioGastos.classList.remove("hidden")
+      usuario = usuarioInput.value
+
     } else {
       alert("Tienes que introducir un usuario")
     }
   })
 }
 
-guardarButton.addEventListener("click", () => {
+guardarButton.addEventListener("click", async () => {
   /*
   Cuandos se pulsa sobre el boton de guardar, guarda los gastos,
   únicamente se guardan si la lista tiene gastos, si no da error
   */
-  const gastos = listarGastos()
-  if (gastos.length > 0) {
-    localStorage.setItem("gastos", JSON.stringify(gastos))
-  } else {
-    alert("No hay gastos para guardar")
-  }
-})
+  const gastosLocal = await fetch(`http://localhost:3000/${usuario}`, { method: "GET" })
+  const gastos = await gastosLocal.json()
+  console.log(gastos)
 
-cargarButton.addEventListener("click", () => {
-  /*
-  Esta funcion se encargar de cargar los gastos. Si no hay gastos
-  no los añade a la pagina, en caso contrario, si los añade
-  */
-  const gastosLocal = JSON.parse(localStorage.getItem("gastos"))
-  if (gastosLocal.length > 0) {
-    gastosLocal.forEach((gasto) => {
+  if (gastos.length > 0) {
+    gastos.forEach((gasto) => {
       let item = document.createElement("gasto-item");
       item.gasto = gasto;
       lista.appendChild(item);
@@ -62,7 +57,11 @@ cargarButton.addEventListener("click", () => {
   } else {
     alert("No hay gastos guardadp")
   }
+
+
 })
+
+
 
 class GastoItem extends HTMLElement {
   constructor() {
@@ -133,45 +132,61 @@ class GastoItem extends HTMLElement {
 customElements.define("gasto-item", GastoItem);
 
 // Variables que guardan el formulario para añadir gastos y la lista donde añadir los gastos
-const formNuevo = document.querySelector(".formulario-gastos");
+const formNuevo = document.querySelector(".formulario-gastos form");
 console.log(formNuevo)
 const lista = document.querySelector(".listado-gastos")
 
-formNuevo.addEventListener("submit", (e) => {
-  e.preventDefault();
+if (formNuevo) {
+  formNuevo.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  // En estas variables se almacenan los datos del gasto añadido
-  const descripcionInput = document.querySelector("#descripcion-input").value
-  const valorInput = parseFloat(document.querySelector("#valor-input").value)
-  const fechaInput = document.querySelector("#fecha-input").value
-  const etiquetasInput = document.querySelector("#etiquetas-input").value
-  const arrayEtiquetas = etiquetasInput.split(',').map(etiqueta => etiqueta.trim())
+    // En estas variables se almacenan los datos del gasto añadido
+    const descripcionInput = document.querySelector("#descripcion-input").value
+    const valorInput = parseFloat(document.querySelector("#valor-input").value)
+    const fechaInput = document.querySelector("#fecha-input").value
+    const etiquetasInput = document.querySelector("#etiquetas-input").value
+    const arrayEtiquetas = etiquetasInput.split(',').map(etiqueta => etiqueta.trim())
 
-  //Se crea el objeto gasto con las variables del los datos del gasto
-  const gasto = new CrearGasto(
-    descripcionInput,
-    valorInput,
-    fechaInput,
-    arrayEtiquetas
-  );
+    //Se crea el objeto gasto con las variables del los datos del gasto
+    const gasto = new CrearGasto(
+      descripcionInput,
+      valorInput,
+      fechaInput,
+      arrayEtiquetas
+    );
 
-  //Se añade el gasto al array deg gastos
-  anyadirGasto(gasto);
+    //Se añade el gasto al array deg gastos
+    anyadirGasto(gasto);
 
-  //Crea el elemento web y lo añade al html
-  const item = document.createElement("gasto-item");
-  item.gasto = gasto;
-  lista.appendChild(item);
+    //Crea el elemento web y lo añade al html
+    const item = document.createElement("gasto-item");
+    item.gasto = gasto;
+    lista.appendChild(item);
 
-  //Actualiza el valor total de los gastos y los añade al html
-  const totalGastosDiv = document.querySelector(".total-gastos")
-  totalGastosDiv.innerHTML =
-    `<p>
-        Total gastos: ${calcularTotalGastos()}
-    </p>`
-  console.log(calcularTotalGastos())
-  console.log(listarGastos())
+    //Actualiza el valor total de los gastos y los añade al html
+    const totalGastosDiv = document.querySelector(".total-gastos")
+    totalGastosDiv.innerHTML =
+      `<p>
+            Total gastos: ${calcularTotalGastos()}
+        </p>`
 
+    if (usuario) {
+      try {
+        const response = await fetch(`http://localhost:3000/${usuario}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(gasto)
+        });
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        console.error("Error al guardar el gasto:", error);
+      }
+    } else {
+      console.error("No hay usuario seleccionado");
+    }
 
-});
-
+  });
+}
