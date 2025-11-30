@@ -99,10 +99,17 @@ class GastoItem extends HTMLElement {
     });
 
     // Cuando se hace click para borrar sale la alerta para confirar
-    btnBorrar.addEventListener("click", () => {
+    btnBorrar.addEventListener("click", async () => {
       if (confirm("¿Seguro que quieres borrar este gasto?")) {
         this.remove();
         borrarGasto(this._gasto)
+        try {
+          await fetch(`http://localhost:3000/${usuario}/${this._gasto.id}`, {
+            method: "DELETE"
+          });
+        } catch (error) {
+          console.error("Error al borrar el gasto:", error);
+        }
       }
     });
 
@@ -114,13 +121,25 @@ class GastoItem extends HTMLElement {
     });
 
     // Se guarda la edicion del gasto
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
       this._gasto.descripcion = form.querySelector("#input-descripcion").value;
       this._gasto.valor = parseFloat(form.querySelector("#input-valor").value);
       this._gasto.fecha = form.querySelector("#input-fecha").value;
       this._gasto.etiquetas = form.querySelector("#input-etiquetas").value.split(",");
       this.render();
+
+      try {
+        await fetch(`http://localhost:3000/${usuario}/${this._gasto.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(this._gasto)
+        });
+      } catch (error) {
+        console.error("Error al actualizar el gasto:", error);
+      }
     });
 
     this.shadowRoot.innerHTML = "";
