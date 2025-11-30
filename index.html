@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de gastos</title>
+    <script src="js/gestionPresupuestoWebV2.js" type="module"></script>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+    <header>
+        <h1>Gestor de presupuesto</h1>
+        <button class="cargar">
+          <img src="images/cargar.png" alt="Icono para cargar">
+        </button>
+        <button class="guardar">
+          <img src="images/descargar.png" alt="Icono para descargar">
+        </button>
+    </header>
+    <main>
+        <div class="formulario-gastos">
+            <form action="">
+                <h2>Añadir gasto</h2>
+                <div class="descripcion input-container">
+                    <label for="descripcion-input">Descripción del gasto</label>
+                    <input type="text" id="descripcion-input" required>
+                </div>
+                <div class="valor input-container">
+                    <label for="valor-input">Valor del gasto</label>
+                    <input type="number" id="valor-input" required>
+                </div>
+                <div class="fecha input-container">
+                    <label for="fecha-input">Fecha del gasto</label>
+                    <input type="date" id="fecha-input" required>
+                </div>
+                <div class="etiquetas input-container">
+                    <label for="etiquetas-input">Etiquetas del gasto(separadas por comas)</label>
+                    <input type="text" id="etiquetas-input">
+                </div>
+                <button class="agregar-gasto">Añadir gasto</button>
+            </form>
+        </div>
+        <div class="listado-gastos">
+            
+        </div>
+        <div class="total-gastos">
+
+        </div>
+
+        <template id="plantilla-gasto">
+            <style>
+              .gasto {
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                padding: 10px;
+                margin-bottom: 10px;
+                background: #f9f9f9;
+              }
+              .acciones {
+                display: flex;
+                gap: 10px;
+              }
+              .form-edicion {
+                display: none;
+                margin-top: 10px;
+                background: #eee;
+                padding: 10px;
+                border-radius: 8px;
+              }
+              .visible {
+                display: block !important;
+              }
+            </style>
+          
+            <div class="gasto">
+              <p><strong>Descripción:</strong> <span id="descripcion"></span></p>
+              <p><strong>Valor:</strong> <span id="valor"></span></p>
+              <p><strong>Fecha:</strong> <span id="fecha"></span></p>
+              <p><strong>Etiquetas:</strong> <span id="etiquetas"></span></p>
+          
+              <div class="acciones">
+                <button id="btn-editar">Editar</button>
+                <button id="btn-borrar">Borrar</button>
+              </div>
+          
+              <form class="form-edicion" id="form-edicion">
+                <label>Descripción: <input id="input-descripcion" type="text"></label><br>
+                <label>Valor: <input id="input-valor" type="number"></label><br>
+                <label>Fecha: <input id="input-fecha" type="date"></label><br>
+                <label>Etiquetas: <input id="input-etiquetas" type="text"></label><br>
+                <button type="submit">Guardar</button>
+                <button type="button" id="btn-cancelar">Cancelar</button>
+              </form>
+            </div>
+          </template>
+    </main>
+</body>
+</html>
